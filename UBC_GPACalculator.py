@@ -24,13 +24,21 @@ def calculateGPA():
     soup.prettify(formatter=lambda s: s.replace(u'\xa0', ' '))
     smallSoup = soup.find('div', {'id' : 'tabs-all'})
     subjectData = smallSoup.find_all('td', {'class' : 'listRow'})
+    subjectDataGrade = smallSoup.find_all('td', {'class': 'listRow grade'})
 
     count = 0
+    actualCourse = 0
     accumulativeCredit = 0.0
     GPA = 0
+    gradeList = []
     totalGrade = 0
     thisGPA = 0
     thisCredit = 0
+
+    for subject in subjectDataGrade:
+        thisData = subject.get_text()
+        if thisData != '&nbsp;' and thisData != '' and thisData != ' ':
+            gradeList.append(int(thisData))
 
     for subject in subjectData:
         thisData = subject.get_text()
@@ -38,15 +46,16 @@ def calculateGPA():
             if count % 11 == 3:
                 if thisData != '&nbsp;' and thisData != '' and thisData != ' ':
                     thisGPA = mapToGPA(thisData)
-                    totalGrade += thisData
                     creditDFail = False
                 else:
                     creditDFail = True
-            if count % 11 == 8:
+            elif count % 11 == 8:
                 if not creditDFail and thisData != ' ' and thisData != '':
                     thisCredit = int(float(thisData))
                     accumulativeCredit = accumulativeCredit + thisCredit
                     GPA = GPA + float("{0:.2f}".format(thisGPA)) * thisCredit
+                    totalGrade += gradeList[actualCourse] * thisCredit
+                    actualCourse += 1
                 else:
                     thisCredit = 0
         else:
