@@ -1,6 +1,7 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import sys
+import os
 import getpass
 import time
 
@@ -8,7 +9,7 @@ login_url = "https://cas.id.ubc.ca/ubc-cas/login?TARGET=https%3A%2F%2Fssc.adm.ub
 
 
 def calculateGPA():
-    driver = webdriver.Chrome('/applications/chromedriver')
+    driver = webdriver.Chrome(os.getcwd() + '/chromedriver')
     login(driver)
 
     # navigate
