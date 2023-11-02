@@ -1,5 +1,8 @@
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 import sys
 import os
 import getpass
@@ -8,17 +11,34 @@ import time
 login_url = "https://cas.id.ubc.ca/ubc-cas/login?TARGET=https%3A%2F%2Fssc.adm.ubc.ca%2Fsscportal%2Fservlets%2FSRVSSCFramework"
 
 
+s = Service(os.getcwd() + '/chromedriver')
+
 def calculateGPA():
-    driver = webdriver.Chrome(os.getcwd() + '/chromedriver')
+    # driver = webdriver.Chrome(os.getcwd() + '/chromedriver')
+    driver = webdriver.Chrome(service=s)
     login(driver)
 
     # navigate
-    driver.find_element_by_name("submit").click()
+    driver.find_element(By.NAME, "submit").click()
     time.sleep(5)
-    driver.find_element_by_link_text("Your Grades Summary").click()
+    # driver.switch_to.default_content()
     # time.sleep(5)
-    iFrame = driver.find_element_by_name("iframe-main")
+    try:
+        driver.find_element(By.LINK_TEXT, "Your Grades Summary").click()
+        time.sleep(5)
+    except Exception as e:
+        print(e)
+        driver.find_element(By.LINK_TEXT, "Your Grades Summary").click()
+    driver.switch_to.default_content()
+
+    try:
+        iFrame = driver.find_element(By.NAME, "iframe-main")
+        time.sleep(5)
+    except Exception as e:
+        print(e)
+        iFrame = driver.find_element(By.NAME, "iframe-main")
     driver.switch_to.frame(iFrame)
+
 
     page = driver.page_source
     soup = BeautifulSoup(page, 'html.parser')
@@ -76,19 +96,36 @@ def login(driver):
     password = getpass.getpass("Please enter your password: ")
     login_credential = [username, password]
 
-    username = driver.find_element_by_id("username")
+    username = driver.find_element(By.ID, "username")
     username.clear()
     username.send_keys(login_credential[0])
 
-    password = driver.find_element_by_id("password")
+    password = driver.find_element(By.ID, "password")
     password.clear()
     password.send_keys(login_credential[1])
 
 
+# def mapToGPA(letterGrade):
+#     return {
+#         'A+': 4.3,
+#         'A' : 4,
+#         'A-': 3.7,
+#         'B+': 3.3,
+#         'B' : 3,
+#         'B-': 2.7,
+#         'C+': 2.3,
+#         'C' : 2,
+#         'C-': 1.7,
+#         'D' : 1,
+#         'F' : 0,
+#         ''  : 0,
+#         ' ' : 0
+#     }[letterGrade]
+
 def mapToGPA(letterGrade):
     return {
-        'A+': 4.3,
-        'A' : 4,
+        'A+': 4,
+        'A' : 3.9,
         'A-': 3.7,
         'B+': 3.3,
         'B' : 3,
